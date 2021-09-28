@@ -1,25 +1,20 @@
 import { babel } from "@rollup/plugin-babel";
 import { terser } from "rollup-plugin-terser";
 
+const extensions = [".ts"];
+
 export default [
   {
-    input: "src/index.js",
+    input: "src/base.ts",
     output: {
-      file: "lib/index.js",
-      format: "es",
-    },
-    plugins: [
-      babel({ babelHelpers: "bundled", exclude: "src/sensorsdata.es6.min.js" }),
-    ],
-  },
-  {
-    input: "src/index.iife.js",
-    output: {
-      file: "lib/qdama-onelog-js.min.js",
+      file: "lib/onelog.min.js",
       format: "iife",
     },
     plugins: [
-      babel({ babelHelpers: "bundled", exclude: "src/sensorsdata.es6.min.js" }),
+      babel({
+        exclude: "./node_modules/**",
+        extensions,
+      }),
       terser(),
     ],
   },

@@ -9,11 +9,15 @@ export class Client {
   }
 
   private watch() {
-    window.onload = (e) => {};
+    window.onload = (e) => {
+      this.send(e);
+    };
     window.onerror = (e) => {
       this.send(e);
     };
-    window.onunload = (e) => {};
+    window.onunload = (e) => {
+      this.send(e);
+    };
   }
 
   private send(payload: any) {
