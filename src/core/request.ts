@@ -1,5 +1,4 @@
 export default function request(data) {
-  console.log("event:", data);
   const url = "https://onelog.cc/event";
   const xhr = new XMLHttpRequest();
   xhr.responseType = "json";

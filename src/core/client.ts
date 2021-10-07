@@ -3,6 +3,8 @@ import Cookie from "js-cookie";
 import { v4 as uuid } from "uuid";
 
 import { CookieModel } from "../types/cookie";
+import { ExtendedError } from "../types/error";
+import { Event, EventType } from "../types/Event";
 
 export default class Client {
   constructor(options: any) {
@@ -14,6 +16,7 @@ export default class Client {
     this.watch();
   }
 
+  // 初始化cookie
   private setCookies() {
     const key = "onelog";
     const current = new Date();
@@ -48,26 +51,53 @@ export default class Client {
     window.addEventListener("pushState", callback);
   }
 
+  // 事件监听
   private watch() {
-    window.onload = (e) => {
-      this.send(e);
-    };
-    window.onhashchange = (e) => {
-      this.send(e);
-    };
     const self = this;
-    this.onpushstatechange(function (e) {
-      self.send(e);
+    window.addEventListener("load", function (e) {
+      self.send("pageview", e);
     });
-    window.onerror = (e) => {
-      this.send(e);
-    };
-    window.onunload = (e) => {
-      this.send(e);
-    };
+    window.addEventListener("hashchange", function (e) {
+      self.send("pageview", e);
+    });
+    this.onpushstatechange(function (e) {
+      self.send("pageview", e);
+    });
+    window.addEventListener(
+      "error",
+      function ({
+        lineno,
+        filename,
+        colno,
+        error: { stack, message: baseMessage },
+        message,
+      }) {
+        const error: ExtendedError = {
+          lineno,
+          filename,
+          colno,
+          stack,
+          message: baseMessage,
+          name: message.split(":")[0],
+        };
+        self.send("error", error);
+      }
+    );
+    window.addEventListener("unload", function (e) {
+      self.send("pageview", e);
+    });
   }
 
-  private send(payload: any) {
-    request(payload);
+  private send(type: EventType, payload: any) {
+    const time = new Date().valueOf();
+    const event: Event = {
+      event_id: uuid(),
+      time,
+      type,
+      payload,
+      title: document.title,
+    };
+    console.log(event);
+    request(event);
   }
 }
